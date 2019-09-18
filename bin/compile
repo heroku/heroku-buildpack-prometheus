@@ -1,0 +1,42 @@
+#!/bin/bash
+
+VERSION=2.12.0
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+#ENV_DIR=$3
+
+arrow() {
+  echo '----->' "$@"
+}
+
+fetch_prometheus() {
+  if [ ! -f $CACHE_DIR/prometheus-${VERSION} ]; then
+    arrow "Installing v${VERSION} of Prometheus"
+    wget --quiet -O prometheus.tar.gz https://github.com/prometheus/prometheus/releases/download/v${VERSION}/prometheus-${VERSION}.linux-amd64.tar.gz
+    tar -xzf prometheus.tar.gz
+
+    rm -f $CACHE_DIR/prometheus-* || true
+    rm -f $CACHE_DIR/promtool-* || true
+    mv prometheus-${VERSION}.linux-amd64/prometheus $CACHE_DIR/prometheus-${VERSION}
+    mv prometheus-${VERSION}.linux-amd64/promtool $CACHE_DIR/promtool-${VERSION}
+  else
+    arrow "Prometheus v${VERSION} found in cache"
+  fi
+}
+
+install_prometheus() {
+  mkdir -p "$BUILD_DIR/bin"
+  cp $CACHE_DIR/prometheus-${VERSION} $BUILD_DIR/bin/prometheus
+  cp $CACHE_DIR/promtool-${VERSION} $BUILD_DIR/bin/promtool
+}
+
+fetch_prometheus
+install_prometheus
+
+mkdir -p $BUILD_DIR/.profile.d
+
+if [ ! -f $BUILD_DIR/.profile.d/prometheus.sh ]; then
+  arrow "Creating .profile.d/prometheus.sh ..."
+  echo "export PATH=\$PATH:/app/bin" > $BUILD_DIR/.profile.d/prometheus.sh
+fi
