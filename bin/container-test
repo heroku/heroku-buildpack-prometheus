@@ -1,0 +1,16 @@
+#!/bin/sh -e
+
+file=Dockerfile
+tagName=$(echo "container-test/$file" | awk '{print tolower($0)}' | sed 's/\./-/g')
+configFile=$(echo  "$file-structure-test" | awk '{print tolower($0)}' | sed 's/\./-/g').yaml
+
+docker pull gcr.io/gcp-runtimes/container-structure-test:v1.8.0
+
+echo "Testing $file from $(pwd)"
+docker build -t $tagName -f $file .
+docker run \
+  -v $(pwd):/app \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  gcr.io/gcp-runtimes/container-structure-test:v1.8.0 test \
+  --image $tagName \
+  --config /app/$configFile

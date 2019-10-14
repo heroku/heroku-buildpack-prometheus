@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 VERSION=2.13.0
 
@@ -38,5 +38,5 @@ mkdir -p $BUILD_DIR/.profile.d
 
 if [ ! -f $BUILD_DIR/.profile.d/prometheus.sh ]; then
   arrow "Creating .profile.d/prometheus.sh ..."
-  echo "export PATH=\$PATH:/app/bin" > $BUILD_DIR/.profile.d/prometheus.sh
+  echo "export PATH=\$PATH:$BUILD_DIR/bin" > $BUILD_DIR/.profile.d/prometheus.sh
 fi
